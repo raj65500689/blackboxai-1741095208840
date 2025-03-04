@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        .message-animation {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .typing-animation::after {
+            content: '...';
+            animation: typing 1s infinite;
+        }
+        @keyframes typing {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col">
+    <!-- Header -->
+    <header class="gradient-bg text-white p-4 shadow-lg">
+        <div class="container mx-auto flex items-center">
+            <i class="fas fa-robot text-3xl mr-3"></i>
+            <h1 class="text-2xl font-semibold">AI Chatbot</h1>
+        </div>
+    </header>
+
+    <!-- Chat Container -->
+    <div class="flex-1 container mx-auto p-4 overflow-hidden flex flex-col">
+        <div id="chat-container" class="flex-1 overflow-y-auto mb-4 space-y-4">
+            <!-- Messages will be inserted here -->
+            <div class="message-animation flex items-start">
+                <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center mr-3">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="bg-white rounded-lg p-3 shadow-md max-w-md">
+                    <p class="text-gray-800">Hello! I'm your AI assistant. How can I help you today?</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="bg-white rounded-lg shadow-lg p-4">
+            <form id="chat-form" class="flex items-center space-x-3">
+                <input 
+                    type="text" 
+                    id="user-input" 
+                    class="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                    placeholder="Type your message..."
+                >
+                <button 
+                    type="submit" 
+                    class="gradient-bg text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity flex items-center"
+                >
+                    <span>Send</span>
+                    <i class="fas fa-paper-plane ml-2"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+
+        // Sample responses
+        const responses = [
+            "That's an interesting question! Let me think about it...",
+            "I understand what you're asking. Here's what I think...",
+            "Based on my knowledge, I would say...",
+            "That's a great point! Here's my perspective...",
+            "Let me help you with that...",
+        ];
+
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message-animation flex items-start ${isUser ? 'flex-row-reverse' : ''}`;
+            
+            const iconDiv = document.createElement('div');
+            iconDiv.className = `w-8 h-8 rounded-full ${isUser ? 'bg-blue-500 ml-3' : 'gradient-bg mr-3'} flex items-center justify-center`;
+            
+            const icon = document.createElement('i');
+            icon.className = `${isUser ? 'fas fa-user' : 'fas fa-robot'} text-white text-sm`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `${isUser ? 'bg-blue-500 text-white' : 'bg-white'} rounded-lg p-3 shadow-md max-w-md`;
+            
+            const text = document.createElement('p');
+            text.className = isUser ? 'text-white' : 'text-gray-800';
+            text.textContent = message;
+            
+            iconDiv.appendChild(icon);
+            contentDiv.appendChild(text);
+            messageDiv.appendChild(iconDiv);
+            messageDiv.appendChild(contentDiv);
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'message-animation flex items-start';
+            typingDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center mr-3">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="bg-white rounded-lg p-3 shadow-md">
+                    <p class="text-gray-800 typing-animation">Thinking</p>
+                </div>
+            `;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (message) {
+                // Add user message
+                addMessage(message, true);
+                userInput.value = '';
+
+                // Show typing indicator
+                addTypingIndicator();
+
+                // Simulate AI response after a delay
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addMessage(randomResponse);
+                }, 1500);
+            }
+        });
+
+        // Add some initial animations
+        document.addEventListener('DOMContentLoaded', () => {
+            chatContainer.style.opacity = '0';
+            chatContainer.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                chatContainer.style.transition = 'all 0.5s ease-out';
+                chatContainer.style.opacity = '1';
+                chatContainer.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
